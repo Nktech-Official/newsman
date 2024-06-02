@@ -1,13 +1,9 @@
-export type Source = {
-  name: string;
-  id: unknown;
-};
 export interface Headlines {
+  index: number;
   title: string;
-  source: Source;
+  sourceName: string;
   description: string;
-  url: URL;
-  urlToImage: URL;
+  url: string;
+  urlToImage: string | null;
   publishedAt: string;
-  content: string;
 }
