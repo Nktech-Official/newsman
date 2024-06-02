@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import NewsAPI from "ts-newsapi";
+import NewsAPI, { ApiNewsCountry } from "ts-newsapi";
 import memoryCache from "memory-cache";
 
 const app = express();
@@ -14,10 +14,12 @@ app.get("/api/headlines", async (req, res) => {
   try {
     const pageNo = parseInt(req.query.pageNo as string) || 1; // Default to page 1
     const pageSize = parseInt(req.query.pageSize as string) || 5; // Default page size
+    const country: ApiNewsCountry = req.query.country as ApiNewsCountry;
+
     const start = (pageNo - 1) * pageSize;
     const end = start + pageSize;
     const pageCachedData = JSON.parse(
-      memoryCache.get(`headlines-${pageNo}-${pageSize}`)
+      memoryCache.get(`headlines-${pageNo}-${pageSize}-${country}`)
     );
 
     if (pageCachedData) {
@@ -32,7 +34,7 @@ app.get("/api/headlines", async (req, res) => {
     console.log(`Page Number:  ${pageNo} Not cached`);
 
     console.log("checking newsapi cache....");
-    const cachedData = JSON.parse(memoryCache.get(`headlines`));
+    const cachedData = JSON.parse(memoryCache.get(`headlines-${country}`));
     if (cachedData) {
       console.log("Headlines retrieved from newsapi cache (page:", pageNo, ")");
       const articles = cachedData.slice(start, end);
@@ -47,7 +49,7 @@ app.get("/api/headlines", async (req, res) => {
       };
 
       memoryCache.put(
-        `headlines-${pageNo}-${pageSize}`,
+        `headlines-${pageNo}-${pageSize}-${country}`,
         JSON.stringify(responseData),
         600000
       );
@@ -58,7 +60,7 @@ app.get("/api/headlines", async (req, res) => {
 
     console.log("retriving data from newsapi");
     const data = await newsapi.getTopHeadlines({
-      country: "in",
+      country: country,
     });
     const headlines = data.articles.map((obj, index) => ({
       index: index,
@@ -80,10 +82,10 @@ app.get("/api/headlines", async (req, res) => {
       articles: articles,
     };
 
-    memoryCache.put("headlines", JSON.stringify(headlines), 600000); //cache the entire api data for 10 minutes to be used to server other pages.
+    memoryCache.put(`headlines-${country}`, JSON.stringify(headlines), 600000); //cache the entire api data for 10 minutes to be used to server other pages.
     // cache page data for future requests.
     memoryCache.put(
-      `headlines-${pageNo}-${pageSize}`,
+      `headlines-${pageNo}-${pageSize}-${country}`,
       JSON.stringify(responseData),
       600000
     );
@@ -98,5 +100,5 @@ app.get("/api/headlines", async (req, res) => {
 });
 
 app.listen(PORT, function () {
-  console.log(`Example app listening on http://localhost:${PORT}!`);
+  console.log(`NewsMan listening on http://localhost:${PORT}!`);
 });
