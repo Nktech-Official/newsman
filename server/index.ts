@@ -10,7 +10,6 @@ app.use(express.static("build/client"));
 
 const newsapi = new NewsAPI(process.env.API_KEY as string);
 
-// cahce the API's response for 10 minutes i.e cache the data by pageNumber.
 app.get("/api/headlines", async (req, res) => {
   try {
     const pageNo = parseInt(req.query.pageNo as string) || 1; // Default to page 1
