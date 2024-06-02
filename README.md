@@ -2,6 +2,8 @@
 
 This is a news application that shows Lates headlines from all around the world. Select your country to geet the latest headlines from different sources.
 
+![Demo](./public/demo.gif)
+
 # Project Setup
 
 - This Project has a backend and frontend.
