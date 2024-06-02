@@ -38,7 +38,7 @@ export default function HeadlineCard(props: Headlines) {
   const time = parsedTime.format("HH:mm:ss");
 
   return (
-    <div className="my-2 w-full lg:flex">
+    <div className="my-2 w-full lg:w-[1000px] xl:w-[1200px] lg:flex">
       <div
         className="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden"
         style={{
@@ -48,7 +48,7 @@ export default function HeadlineCard(props: Headlines) {
         }}
         title="Woman holding a mug"
       ></div>
-      <div className="border-r border-b border-l border-grey-light lg:border-l-0 lg:border-t lg:border-grey-light bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
+      <div className="border-r lg:w-full border-b border-l border-grey-light lg:border-l-0 lg:border-t lg:border-grey-light bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
         <div className="mb-8">
           <div className="text-black hover:opacity-60 opacity-100 hover:underline underline-offset-4 font-bold text-xl mb-2">
             {" "}

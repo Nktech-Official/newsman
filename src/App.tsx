@@ -8,17 +8,21 @@ import { useNavigate } from "react-router-dom";
 export default function App() {
   const [headlines, setHeadlines] = useState<Headlines[]>();
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [outOfRange, setOutOfRange] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  // Reading queryParameters To maintain state
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const page = urlParams.get("page") || "1";
   const navigate = useNavigate();
 
   useEffect(() => {
+    setError(false);
+    setOutOfRange(false);
     const p = parseInt(page);
     console.log(p);
     console.log(totalPages);
 
-    if (p <= 0 || p > totalPages) return;
     axios
       .get(`/api/headlines?pageNo=${page}`)
       .then((res) => {
@@ -28,9 +32,12 @@ export default function App() {
         console.log(res.data.articles);
       })
       .catch((err) => {
-        console.log(err);
+        const errorData = err.response.data;
+        if (errorData.error === "OutOfBound") setOutOfRange(true);
+        else setError(true);
+        console.log(errorData);
       });
-  }, [page, totalPages]);
+  }, [page, totalPages, error]);
   const pagesToRender = Array.from({ length: totalPages as number });
   const nextHeadlines = () => {
     const p = parseInt(page) + 1;
@@ -40,7 +47,6 @@ export default function App() {
   };
   const previousHeadlines = () => {
     const p = parseInt(page as string) - 1;
-    console.log(page, p);
 
     if (p > 0) {
       navigate(`/?page=${p}`);
@@ -53,7 +59,21 @@ export default function App() {
         headlines.map((headline, index) => {
           return <HeadlineCard key={index} {...headline} />;
         })}
-
+      {outOfRange && (
+        <>
+          <div className="h-[80vh] flex justify-center items-center text-lg m-4 lg:text-2xl font-semibold text-center">
+            Page is Out of Range Please use Navigation Bar below to go to
+            correct page
+          </div>
+        </>
+      )}
+      {error && (
+        <>
+          <div className="h-[80vh] flex justify-center items-center text-lg m-4 lg:text-2xl font-semibold text-center">
+            Internal Server Error: 500
+          </div>
+        </>
+      )}
       <nav
         aria-label="Page navigation"
         className="flex cursor-pointer justify-center mt-4 mb-9"
@@ -83,6 +103,7 @@ export default function App() {
           {pagesToRender.map((_, index) => {
             return <PageNavigationItem pageNumber={index + 1} key={index} />;
           })}
+
           <li>
             <p
               onClick={nextHeadlines}

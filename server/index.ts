@@ -13,8 +13,6 @@ const newsapi = new NewsAPI(process.env.API_KEY as string);
 // cahce the API's response for 10 minutes i.e cache the data by pageNumber.
 app.get("/api/headlines", async (req, res) => {
   try {
-    console.log(req.query.pageNo);
-
     const pageNo = parseInt(req.query.pageNo as string) || 1; // Default to page 1
     const pageSize = parseInt(req.query.pageSize as string) || 5; // Default page size
     const start = (pageNo - 1) * pageSize;
@@ -25,6 +23,10 @@ app.get("/api/headlines", async (req, res) => {
 
     if (pageCachedData) {
       console.log("Headlines retrieved from cache (page:", pageNo, ")");
+      if (pageCachedData.length === 0) {
+        res.status(406).json({ error: "OutOfBound", status: "Error" });
+        return;
+      }
       res.status(200).json(pageCachedData);
       return;
     }
@@ -34,10 +36,15 @@ app.get("/api/headlines", async (req, res) => {
     const cachedData = JSON.parse(memoryCache.get(`headlines`));
     if (cachedData) {
       console.log("Headlines retrieved from newsapi cache (page:", pageNo, ")");
+      const articles = cachedData.slice(start, end);
+      if (articles.length === 0) {
+        res.status(406).json({ error: "OutOfBound", status: "Error" });
+        return;
+      }
       const responseData = {
         totalPage: Math.ceil(cachedData.length / pageSize),
         pageNo: pageNo,
-        articles: cachedData.slice(start, end),
+        articles: articles,
       };
 
       memoryCache.put(
@@ -63,10 +70,15 @@ app.get("/api/headlines", async (req, res) => {
       urlToImage: obj.urlToImage,
       publishedAt: obj.publishedAt,
     }));
+    const articles = headlines.slice(start, end);
+    if (articles.length === 0) {
+      res.status(406).json({ error: "OutOfBound", status: "Error" });
+      return;
+    }
     const responseData = {
       totalPage: Math.ceil(headlines.length / pageSize),
       pageNo: pageNo,
-      articles: headlines.slice(start, end),
+      articles: articles,
     };
 
     memoryCache.put("headlines", JSON.stringify(headlines), 600000); //cache the entire api data for 10 minutes to be used to server other pages.
@@ -87,5 +99,5 @@ app.get("/api/headlines", async (req, res) => {
 });
 
 app.listen(PORT, function () {
-  console.log(`Example app listening on ${PORT}!`);
+  console.log(`Example app listening on http://localhost:${PORT}!`);
 });

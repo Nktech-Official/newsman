@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "preview": "cd server && yarn start",
+    "start": "cd server && yarn start",
     "dev": "vite & yarn server:dev",
     "build": "tsc && vite build && yarn server:build",
     "server:dev": "cd  server && yarn dev",
