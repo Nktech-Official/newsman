@@ -25,7 +25,6 @@ export const countries: country[] = [
   { code: "id", name: "Indonesia" },
   { code: "ie", name: "Ireland" },
   { code: "il", name: "Israel" },
-  { code: "in", name: "India" },
   { code: "it", name: "Italy" },
   { code: "jp", name: "Japan" },
   { code: "kr", name: "South Korea" },

@@ -11,44 +11,52 @@ export default function App() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [outOfRange, setOutOfRange] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [countryCode, setCountrCode] = useState<ApiNewsCountry>("in");
+
+  // dynammically render page navigation
+  const pagesToRender = Array.from({ length: totalPages });
+
   // Reading queryParameters To maintain state
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const page = urlParams.get("page") || "1";
+  const countryCode = (urlParams.get("country") || "in") as ApiNewsCountry;
   const navigate = useNavigate();
 
   useEffect(() => {
-    setError(false);
-    setOutOfRange(false);
+    setError(false); //set Error to false
+    setOutOfRange(false); //set outOfRange error to false
     axios
-      .get(`/api/headlines?pageNo=${page}&country=${countryCode}`)
+      .get(`/api/headlines?pageNo=${page}&country=${countryCode}`) //call backend for data
       .then((res) => {
         setHeadlines(res.data.articles);
         setTotalPages(res.data.totalPage);
       })
       .catch((err) => {
         const errorData = err.response.data;
-        if (errorData.error === "OutOfBound") setOutOfRange(true);
-        else setError(true);
+        if (errorData.error === "OutOfBound")
+          setOutOfRange(true); //If outOf Bound set Error for it
+        else setError(true); //Set Error
       });
   }, [page, totalPages, error, countryCode]);
-  const pagesToRender = Array.from({ length: totalPages as number });
+
   const nextHeadlines = () => {
-    const p = parseInt(page) + 1;
-    if (p <= totalPages) {
-      navigate(`/?page=${p}`);
+    const nextPage = parseInt(page) + 1; //next page to navigate to
+    if (nextPage <= totalPages) {
+      //check for bounds.
+      navigate(`/?page=${nextPage}&country=${countryCode}`);
     }
   };
   const previousHeadlines = () => {
-    const p = parseInt(page as string) - 1;
+    const previousPage = parseInt(page as string) - 1; //Previous Page to navigate to.
 
-    if (p > 0) {
-      navigate(`/?page=${p}`);
+    if (previousPage > 0) {
+      //check for bounds
+      navigate(`/?page=${previousPage}&country=${countryCode}`);
     }
   };
   const countryChange: ChangeEventHandler<HTMLSelectElement> = (event) => {
-    setCountrCode(event.target.value as ApiNewsCountry);
+    //navigate on country change
+    navigate(`/?country=${event.target.value}`);
   };
   return (
     <div className="container m-auto">
@@ -67,6 +75,7 @@ export default function App() {
             </label>
             <select
               onChange={countryChange}
+              value={countryCode} //link state and value (double link)
               id="countries"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
@@ -125,7 +134,13 @@ export default function App() {
             </li>
 
             {pagesToRender.map((_, index) => {
-              return <PageNavigationItem pageNumber={index + 1} key={index} />;
+              return (
+                <PageNavigationItem
+                  pageNumber={index + 1}
+                  country={countryCode}
+                  key={index}
+                />
+              );
             })}
 
             <li>

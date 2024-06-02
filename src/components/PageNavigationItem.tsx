@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { ApiNewsCountry } from "../lib/types";
 
 export default function PageNavigationItem({
   pageNumber,
+  country,
 }: {
   pageNumber: number;
+  country: ApiNewsCountry;
 }) {
   const navigate = useNavigate();
   const goToPage = () => {
-    navigate(`/?page=${pageNumber}`);
+    navigate(`/?page=${pageNumber}&country=${country}`);
   };
   return (
     <li>
